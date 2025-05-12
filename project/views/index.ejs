@@ -1,0 +1,71 @@
+<%- include('./layout/header') %>
+
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">Discover & Book<br>Amazing Events</h1>
+                <p class="lead my-4">Find the perfect events for your interests and secure your seats with our easy booking system.</p>
+                <a href="/events" class="btn btn-primary btn-lg">Browse Events</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://images.pexels.com/photos/2263436/pexels-photo-2263436.jpeg" alt="Event Booking Hero" class="img-fluid rounded hero-image">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="featured-events py-5">
+    <div class="container">
+        <h2 class="section-title text-center mb-4">Featured Events</h2>
+        <div class="row">
+            <% events.forEach(event => { %>
+                <div class="col-md-4 mb-4">
+                    <div class="card event-card h-100">
+                        <img src="<%= event.image %>" class="card-img-top" alt="<%= event.title %>">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= event.title %></h5>
+                            <p class="card-text text-muted mb-1"><i class="bi bi-geo-alt"></i> <%= event.venue %></p>
+                            <p class="card-text text-muted mb-3"><i class="bi bi-calendar"></i> <%= event.date %> at <%= event.time %></p>
+                            <a href="/events/<%= event.id %>" class="btn btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+        <div class="text-center mt-4">
+            <a href="/events" class="btn btn-primary">View All Events</a>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works py-5 bg-light">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">How It Works</h2>
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="how-it-works-item">
+                    <div class="icon-circle mb-3">1</div>
+                    <h4>Find an Event</h4>
+                    <p>Browse our curated list of upcoming events</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="how-it-works-item">
+                    <div class="icon-circle mb-3">2</div>
+                    <h4>Choose Your Seats</h4>
+                    <p>Select the best seats from our interactive seating map</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="how-it-works-item">
+                    <div class="icon-circle mb-3">3</div>
+                    <h4>Confirm Booking</h4>
+                    <p>Complete your booking and get ready to attend</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('./layout/footer') %>

@@ -1,0 +1,61 @@
+<%- include('../layout/header') %>
+
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/events">Events</a></li>
+            <li class="breadcrumb-item"><a href="/events/<%= event.id %>"><%= event.title %></a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">Edit Event</h1>
+                    <form action="/events/<%= event.id %>?_method=PUT" method="POST">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Event Title</label>
+                            <input type="text" class="form-control" id="title" name="title" value="<%= event.title %>" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required><%= event.description %></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="date" name="date" value="<%= event.date %>" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="time" class="form-label">Time</label>
+                                <input type="time" class="form-control" id="time" name="time" value="<%= event.time %>" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="venue" class="form-label">Venue</label>
+                            <input type="text" class="form-control" id="venue" name="venue" value="<%= event.venue %>" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Image URL</label>
+                            <input type="url" class="form-control" id="image" name="image" value="<%= event.image %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="totalSeats" class="form-label">Total Seats</label>
+                            <input type="number" class="form-control" id="totalSeats" name="totalSeats" value="<%= event.totalSeats %>" min="<%= event.bookedSeats.length %>" required>
+                            <div class="form-text">Cannot be less than the number of seats already booked (<%= event.bookedSeats.length %>).</div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Event</button>
+                            <a href="/events/<%= event.id %>" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../layout/footer') %>

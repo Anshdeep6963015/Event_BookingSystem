@@ -1,0 +1,165 @@
+<%- include('../layout/header') %>
+
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/events">Events</a></li>
+            <li class="breadcrumb-item"><a href="/events/<%= event.id %>"><%= event.title %></a></li>
+            <li class="breadcrumb-item active" aria-current="page">Book Seats</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h1 class="card-title mb-4">Select Your Seats</h1>
+                    <p class="card-text mb-4">Choose from the available seats for "<%= event.title %>" at <%= event.venue %>.</p>
+                    
+                    <form action="/events/<%= event.id %>/book" method="POST">
+                        <div class="mb-4">
+                            <div class="seat-map-container">
+                                <div class="screen mb-4">
+                                    <div class="screen-text">STAGE / SCREEN</div>
+                                </div>
+                                
+                                <div class="seat-map">
+                                    <% 
+                                    const rows = ['A', 'B', 'C', 'D', 'E'];
+                                    const seatsPerRow = 10;
+                                    %>
+                                    
+                                    <% rows.forEach(row => { %>
+                                        <div class="seat-row">
+                                            <div class="row-label"><%= row %></div>
+                                            <% for(let i = 1; i <= seatsPerRow; i++) { %>
+                                                <% 
+                                                    const seatId = `${row}${i}`;
+                                                    const isBooked = event.bookedSeats.includes(seatId);
+                                                %>
+                                                <div class="seat-wrapper">
+                                                    <input type="checkbox" 
+                                                        id="seat-<%= seatId %>" 
+                                                        name="seats" 
+                                                        value="<%= seatId %>"
+                                                        <%= isBooked ? 'disabled' : '' %>
+                                                        class="seat-checkbox">
+                                                    <label for="seat-<%= seatId %>" 
+                                                        class="seat <%= isBooked ? 'booked' : '' %>" 
+                                                        title="<%= seatId %> <%= isBooked ? '(Booked)' : '' %>">
+                                                        <%= i %>
+                                                    </label>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                                
+                                <div class="seat-legend mt-4">
+                                    <div class="legend-item">
+                                        <span class="seat-sample available"></span>
+                                        <span>Available</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="seat-sample selected"></span>
+                                        <span>Selected</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="seat-sample booked"></span>
+                                        <span>Booked</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="selected-seats-summary mt-4 mb-4">
+                            <h5>Selected Seats: <span id="selected-seats-count">0</span></h5>
+                            <div id="selected-seats-list" class="selected-seats-list"></div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="book-button" disabled>Confirm Booking</button>
+                            <a href="/events/<%= event.id %>" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card event-sidebar-card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Event Summary</h4>
+                    <div class="event-summary-img mb-3">
+                        <img src="<%= event.image %>" alt="<%= event.title %>" class="img-fluid rounded">
+                    </div>
+                    <h5><%= event.title %></h5>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-calendar"></i> Date</span>
+                            <span class="text-primary"><%= event.date %></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-clock"></i> Time</span>
+                            <span class="text-primary"><%= event.time %></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-geo-alt"></i> Venue</span>
+                            <span class="text-primary"><%= event.venue %></span>
+                        </li>
+                    </ul>
+                    <div class="booking-summary">
+                        <h5>Booking Summary</h5>
+                        <div class="d-flex justify-content-between">
+                            <span>Number of Seats:</span>
+                            <span id="summary-seat-count">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const seatCheckboxes = document.querySelectorAll('.seat-checkbox');
+        const selectedSeatsCount = document.getElementById('selected-seats-count');
+        const selectedSeatsList = document.getElementById('selected-seats-list');
+        const summaryCount = document.getElementById('summary-seat-count');
+        const bookButton = document.getElementById('book-button');
+        
+        seatCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSelectedSeats();
+            });
+        });
+        
+        function updateSelectedSeats() {
+            const selectedSeats = Array.from(seatCheckboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
+            
+            const count = selectedSeats.length;
+            selectedSeatsCount.textContent = count;
+            summaryCount.textContent = count;
+            
+            // Update the selected seats list
+            selectedSeatsList.innerHTML = '';
+            if (count > 0) {
+                selectedSeats.sort().forEach(seat => {
+                    const seatTag = document.createElement('span');
+                    seatTag.className = 'selected-seat-tag';
+                    seatTag.textContent = seat;
+                    selectedSeatsList.appendChild(seatTag);
+                });
+            }
+            
+            // Enable or disable the book button
+            bookButton.disabled = count === 0;
+        }
+    });
+</script>
+
+<%- include('../layout/footer') %>
